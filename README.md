@@ -58,7 +58,7 @@ Zero means background color, one means ink color, other values mean a bug in my 
 
 4. Use big pixels, high contrast and a border in the background color around the symbol, at least one pixel wide.
 
-If that was not clear enough, you can look at https://github.com/pfusik/datamatrix6502/blob/master/example-atari.asx
+If that was not clear enough, you can look at [example-atari.asx](https://github.com/pfusik/datamatrix6502/blob/master/example-atari.asx).
 
 WTF is 6502?
 ------------
