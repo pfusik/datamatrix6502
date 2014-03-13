@@ -6,27 +6,31 @@
 ; If we meet some day, and you think this stuff is worth it, you can buy me a beer in return.
 
 ; Compile with xasm (http://xasm.atari.org/), for example:
-; xasm datamatrix.asx /d:DataMatrix_code=$b700 /d:DataMatrix_data=$b900 /d:DataMatrix_SIZE=20
-; DataMatrix_code - less than 512 bytes of self-modifying code
-; DataMatrix_data - less than 768 bytes of uninitialized data
-; DataMatrix_SIZE - 10, 12, 14, 16, 18, 20, 22, 24 or 26
+; xasm datamatrix.asx /l /d:DataMatrix_code=$b600 /d:DataMatrix_data=$b900 /d:DataMatrix_SIZE=20
+; DataMatrix_code - self-modifying code
+; DataMatrix_data - uninitialized data
+; DataMatrix_SIZE - 10, 12, 14, 16, 18, 20, 22, 24, 26, 32, 36, 40, 44 or 48
 
 ; public interface:
 
 DataMatrix_EOF	equ	128
 
 DataMatrix_message	equ	DataMatrix_data ; DataMatrix_DATA_CODEWORDS
-DataMatrix_symbol	equ	DataMatrix_data+$50	; DataMatrix_SIZE*DataMatrix_SIZE = up to $2a4
+DataMatrix_symbol	equ	DataMatrix_data+$100	; DataMatrix_SIZE*DataMatrix_SIZE
 
 ; private:
 
+	ift	DataMatrix_SIZE<=26
 DataMatrix_MATRIX_SIZE	equ	DataMatrix_SIZE-2
+	els
+DataMatrix_MATRIX_SIZE	equ	DataMatrix_SIZE-4
+	eif
 
 DataMatrix_dataCodewords	equ	DataMatrix_message	; DataMatrix_DATA_CODEWORDS
 DataMatrix_errorCodewords	equ	DataMatrix_dataCodewords+DataMatrix_DATA_CODEWORDS ; DataMatrix_ERROR_CODEWORDS
 
-DataMatrix_exp	equ	DataMatrix_data+$50	; $100
-DataMatrix_log	equ	Datamatrix_data+$150	; $100
+DataMatrix_exp	equ	DataMatrix_data+$100	; $100
+DataMatrix_log	equ	Datamatrix_data+$200	; $100
 
 	org	DataMatrix_code
 
@@ -89,22 +93,14 @@ DataMatrix_reedSolomon_3
 	cpx	#DataMatrix_DATA_CODEWORDS
 	bcc	DataMatrix_reedSolomon_1
 
-	ldx	#DataMatrix_SIZE-1
-DataMatrix_horizontal_1
-	txa
-	and:eor	#1
-	sta	DataMatrix_symbol,x
-	mva	#1	DataMatrix_symbol+[DataMatrix_SIZE-1]*DataMatrix_SIZE,x
-	dex
-	bpl	DataMatrix_horizontal_1
-
-	ldy	#DataMatrix_MATRIX_SIZE-1
+	ldy	#DataMatrix_SIZE-3
 	mwa	#DataMatrix_symbol	DataMatrix_clear_store+1
 DataMatrix_clear_line
 	lda	#DataMatrix_SIZE
 	add:sta	DataMatrix_clear_store+1
 	scc:inc	DataMatrix_clear_store+2
 	ldx	#DataMatrix_SIZE-1
+DataMatrix_clear_dashed
 	tya
 	and	#1
 DataMatrix_clear_store
@@ -112,12 +108,30 @@ DataMatrix_clear_store
 	lda	#2
 	dex
 	bmi	DataMatrix_clear_next
+	ift	DataMatrix_SIZE>26
+	beq	DataMatrix_clear_solid
+	cpx	#DataMatrix_SIZE/2-1
+	beq	DataMatrix_clear_dashed
+	cpx	#DataMatrix_SIZE/2
+	eif
 	bne	DataMatrix_clear_store
+DataMatrix_clear_solid
 	lsr	@
 	bpl	DataMatrix_clear_store
 DataMatrix_clear_next
 	dey
 	bpl	DataMatrix_clear_line
+
+	ldx	#DataMatrix_SIZE-1
+DataMatrix_horizontal_1
+	txa
+	and:eor	#1
+	sta	DataMatrix_symbol,x
+:DataMatrix_SIZE>26	sta	DataMatrix_symbol+DataMatrix_SIZE/2*DataMatrix_SIZE,x
+	mva	#1	DataMatrix_symbol+[DataMatrix_SIZE-1]*DataMatrix_SIZE,x
+:DataMatrix_SIZE>26	sta	DataMatrix_symbol+[DataMatrix_SIZE/2-1]*DataMatrix_SIZE,x
+	dex
+	bpl	DataMatrix_horizontal_1
 
 	mwa	#DataMatrix_dataCodewords	DataMatrix_fillSource
 	ldx	#0
@@ -203,9 +217,15 @@ DataMatrix_setModuleWrapped_yOk
 	tay
 	eif
 DataMatrix_setModuleWrapped_xOk
-	plp
+	ift	DataMatrix_SIZE>26
+	cpx	#DataMatrix_MATRIX_SIZE/2
+	bcc	DataMatrix_setModuleWrapped_leftRegion
+	inx:inx
+DataMatrix_setModuleWrapped_leftRegion
+	eif
 	mva	DataMatrix_matrixLo,y	DataMatrix_setModule_store+1
 	mva	DataMatrix_matrixHi,y	DataMatrix_setModule_store+2
+	plp
 	lda	#0
 	rol	@
 DataMatrix_setModule_store
@@ -215,8 +235,17 @@ DataMatrix_setUtah_no
 
 DataMatrix_setUtah
 	bcs	DataMatrix_setUtah_no
-	mva	DataMatrix_matrixLo,y	DataMatrix_setUtah_load+1
-	mva	DataMatrix_matrixHi,y	DataMatrix_setUtah_load+2
+	lda	DataMatrix_matrixLo,y
+	ift	DataMatrix_SIZE>26
+	cpx	#DataMatrix_MATRIX_SIZE/2
+	scc:adc	#1
+	eif
+	sta	DataMatrix_setUtah_load+1
+	lda	DataMatrix_matrixHi,y
+	ift	DataMatrix_SIZE>26
+	adc	#0
+	eif
+	sta	DataMatrix_setUtah_load+2
 DataMatrix_setUtah_load
 	lda	$ffff,x
 	lsr	@
@@ -293,6 +322,31 @@ DataMatrix_DATA_CODEWORDS	equ	44
 DataMatrix_ERROR_CODEWORDS	equ	28
 DataMatrix_poly	dta	$96,$20,$6d,$95,$ef,$d5,$c6,$30,$5e,$32,$0c,$c3,$a7,$82,$c4,$fd,$63,$a6,$ef,$de,$92,$be,$f5,$b8,$ad,$7d,$11,$97
 
+	eli	DataMatrix_SIZE==32
+DataMatrix_DATA_CODEWORDS	equ	62
+DataMatrix_ERROR_CODEWORDS	equ	36
+DataMatrix_poly	dta	$39,$56,$bb,$45,$8c,$99,$1f,$42,$87,$43,$f8,$54,$5a,$51,$db,$c5,$02,$01,$27,$10,$4b,$e5,$14,$33,$fc,$6c,$d5,$b5,$b7,$57,$6f,$4d,$e8,$a8,$b0,$9c
+
+	eli	DataMatrix_SIZE==36
+DataMatrix_DATA_CODEWORDS	equ	86
+DataMatrix_ERROR_CODEWORDS	equ	42
+DataMatrix_poly	dta	$e1,$26,$e1,$94,$c0,$fe,$8d,$0b,$52,$ed,$51,$18,$0d,$7a,$ff,$6a,$a7,$0d,$cf,$a0,$58,$cb,$26,$8e,$54,$42,$03,$a8,$66,$9c,$01,$c8,$58,$3c,$e9,$86,$73,$72,$ea,$5a,$41,$8a
+
+	eli	DataMatrix_SIZE==40
+DataMatrix_DATA_CODEWORDS	equ	114
+DataMatrix_ERROR_CODEWORDS	equ	48
+DataMatrix_poly	dta	$72,$45,$7a,$1e,$5e,$0b,$42,$e6,$84,$49,$91,$89,$87,$4f,$d6,$21,$0c,$dc,$8e,$d5,$88,$7c,$d7,$a6,$09,$de,$1c,$9a,$84,$04,$64,$aa,$91,$3b,$a4,$d7,$11,$f9,$66,$f9,$86,$80,$05,$f5,$83,$7f,$dd,$9c
+
+	eli	DataMatrix_SIZE==44
+DataMatrix_DATA_CODEWORDS	equ	144
+DataMatrix_ERROR_CODEWORDS	equ	56
+DataMatrix_poly	dta	$1d,$b3,$63,$95,$9f,$48,$7d,$16,$37,$3c,$d9,$b0,$9c,$5a,$2b,$50,$fb,$eb,$80,$a9,$fe,$86,$f9,$2a,$79,$76,$48,$80,$81,$e8,$25,$0f,$18,$dd,$8f,$73,$83,$28,$71,$fe,$13,$7b,$f6,$44,$a6,$42,$76,$8e,$2f,$33,$c3,$f2,$f9,$83,$26,$42
+
+	eli	DataMatrix_SIZE==48
+DataMatrix_DATA_CODEWORDS	equ	174
+DataMatrix_ERROR_CODEWORDS	equ	68
+DataMatrix_poly	dta	$21,$4f,$be,$f5,$5b,$dd,$e9,$19,$18,$06,$90,$97,$79,$ba,$8c,$7f,$2d,$99,$fa,$b7,$46,$83,$c6,$11,$59,$f5,$79,$33,$8c,$fc,$cb,$52,$53,$e9,$98,$dc,$9b,$12,$e6,$d2,$5e,$20,$c8,$c5,$c0,$c2,$ca,$81,$0a,$ed,$c6,$5e,$b0,$24,$28,$8b,$c9,$84,$db,$22,$38,$71,$34,$14,$22,$f7,$0f,$33
+
 	els
 	ert	1	; unsupported DataMatrix_SIZE
 	eif
@@ -301,21 +355,30 @@ DataMatrix_padding
 :DataMatrix_DATA_CODEWORDS	dta	[129+[1+#]*149%253]%254+1
 
 DataMatrix_shapeX	dta	0,-1,-2,0,-1,-2,-1,-2
-	ift	[DataMatrix_SIZE&7]==6 ; corner1
+	ift	DataMatrix_SIZE==14||DataMatrix_SIZE==22||DataMatrix_SIZE==32||DataMatrix_SIZE==40||DataMatrix_SIZE==48 ; corner1
 	dta	DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-2,2,1,0
-	eli	[DataMatrix_SIZE&7]==0 ; corner2
+	eli	DataMatrix_SIZE==16||DataMatrix_SIZE==24 ; corner2
 	dta	DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-2,DataMatrix_MATRIX_SIZE-3,DataMatrix_MATRIX_SIZE-4,0,0,0
 	eif
 DataMatrix_shapeY	dta	0,0,0,-1,-1,-1,-2,-2
-	ift	[DataMatrix_SIZE&7]==6 ; corner1
+	ift	DataMatrix_SIZE==14||DataMatrix_SIZE==22||DataMatrix_SIZE==32||DataMatrix_SIZE==40||DataMatrix_SIZE==48 ; corner1
 	dta	3-DataMatrix_MATRIX_SIZE,2-DataMatrix_MATRIX_SIZE,1-DataMatrix_MATRIX_SIZE,-DataMatrix_MATRIX_SIZE,-DataMatrix_MATRIX_SIZE,-1,-1,-1
-	eli	[DataMatrix_SIZE&7]==0 ; corner2
+	eli	DataMatrix_SIZE==16||DataMatrix_SIZE==24 ; corner2
 	dta	3-DataMatrix_MATRIX_SIZE,2-DataMatrix_MATRIX_SIZE,2-DataMatrix_MATRIX_SIZE,2-DataMatrix_MATRIX_SIZE,2-DataMatrix_MATRIX_SIZE,1,0,-1
 	eif
 
+	ift	DataMatrix_SIZE<=26
 DataMatrix_matrixLo
 :DataMatrix_MATRIX_SIZE	dta	l(DataMatrix_symbol+[1+#]*DataMatrix_SIZE+1)
 DataMatrix_matrixHi
 :DataMatrix_MATRIX_SIZE	dta	h(DataMatrix_symbol+[1+#]*DataMatrix_SIZE+1)
+	els
+DataMatrix_matrixLo
+:DataMatrix_MATRIX_SIZE/2	dta	l(DataMatrix_symbol+[1+#]*DataMatrix_SIZE+1)
+:DataMatrix_MATRIX_SIZE/2	dta	l(DataMatrix_symbol+[1+DataMatrix_SIZE/2+#]*DataMatrix_SIZE+1)
+DataMatrix_matrixHi
+:DataMatrix_MATRIX_SIZE/2	dta	h(DataMatrix_symbol+[1+#]*DataMatrix_SIZE+1)
+:DataMatrix_MATRIX_SIZE/2	dta	h(DataMatrix_symbol+[1+DataMatrix_SIZE/2+#]*DataMatrix_SIZE+1)
+	eif
 
 	end

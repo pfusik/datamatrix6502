@@ -1,10 +1,10 @@
-DataMatrix_code	equ	$8000	; $200
-DataMatrix_data	equ	$8200	; $300
+DataMatrix_code	equ	$8000
+DataMatrix_data	equ	$8400
 DataMatrix_SIZE	equ	18
 
 	icl	'datamatrix.asx'
 
-	org	$8500
+	org	$8e00
 main
 	jsr	DataMatrix_code
 

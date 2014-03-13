@@ -4,7 +4,7 @@
 This projects implements [Data Matrix barcode](http://en.wikipedia.org/wiki/Data_Matrix)
 in the [6502](http://en.wikipedia.org/wiki/6502) assembly language.
 
-Supported are square ECC 200 symbol sizes up to 26x26.
+Supported are square ECC 200 symbol sizes up to 48x48.
 Symbol size limits the length of the encoded message and must be selected at compile time:
 
 * 10x10 (max 3 characters)
@@ -16,24 +16,32 @@ Symbol size limits the length of the encoded message and must be selected at com
 * 22x22 (max 30 characters)
 * 24x24 (max 36 characters)
 * 26x26 (max 44 characters)
+* 32x32 (max 62 characters)
+* 36x36 (max 86 characters)
+* 40x40 (max 114 characters)
+* 44x44 (max 144 characters)
+* 48x48 (max 174 characters)
 
 Compilation
 -----------
 
 The routine uses two memory areas:
 
-* `DataMatrix_code` - less than 512 bytes of self-modifying code
-* `DataMatrix_data` - less than 768 bytes of uninitialized data,
-including the input message and the resulting symbol
+* `DataMatrix_code` - self-modifying code
+* `DataMatrix_data` - uninitialized data, including the input message and the resulting symbol
+
+The size of code and data depends on the symbol size and can be estimated as follows:
+* Code always fits in 768 bytes (512 for symbols up to 26x26).
+* Data fits in 768 or `256+DataMatrix_SIZE*DataMatrix_SIZE` bytes, whichever is more.
 
 The routine doesn't use zero page. There are no restrictions on the alignment of code or data.
 
 In addition to code and data locations, you must select the desired symbol size:
-10, 12, 14, 16, 18, 20, 22, 24 or 26.
+10, 12, 14, 16, 18, 20, 22, 24, 26, 32, 36, 40, 44 or 48.
 
 So, a valid compilation command-line is:
 
-    xasm datamatrix.asx /d:DataMatrix_code=$b700 /d:DataMatrix_data=$b900 /d:DataMatrix_SIZE=20
+    xasm datamatrix.asx /l /d:DataMatrix_code=$b600 /d:DataMatrix_data=$b900 /d:DataMatrix_SIZE=20
 
 (escape the dollars if in Unix shell or Makefile).
 
@@ -53,12 +61,14 @@ Please note that the routine will destroy the input message, so you need to recr
     jsr DataMatrix_code
 
 3. Get the square array of `DataMatrix_SIZE*DataMatrix_SIZE` bytes starting from
-`DataMatrix_data+$50`. Information about the x,y pixel is at `DataMatrix_data+$50+y*DataMatrix_SIZE+x`.
+`DataMatrix_data+$100`. Information about the x,y pixel is at `DataMatrix_data+$100+y*DataMatrix_SIZE+x`.
 Zero means background color, one means ink color, other values mean a bug in my code (file a report).
 
 4. Use big pixels, high contrast and a border in the background color around the symbol, at least one pixel wide.
 
-If that was not clear enough, you can look at [example-atari.asx](https://github.com/pfusik/datamatrix6502/blob/master/example-atari.asx).
+If that was not clear enough, you can look at
+[example-atari.asx](https://github.com/pfusik/datamatrix6502/blob/master/example-atari.asx).
+and [example-atari-gfx.asx](https://github.com/pfusik/datamatrix6502/blob/master/example-atari-gfx.asx).
 
 WTF is 6502?
 ------------
