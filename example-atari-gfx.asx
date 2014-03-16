@@ -16,6 +16,7 @@ main
 	mva	#12	$34a,x
 	mva	#4	$34b,x
 	jsr	$e456
+	mva	#0	$2c4	; black ink
 
 	mwa	$58	scr_ptr
 	ldx	#DataMatrix_SIZE
@@ -39,7 +40,9 @@ symbol_ptr	equ	*-2
 	scc:inc	scr_ptr+1
 	dex
 	bne	draw_line
-	
+
+	mva	#$c	$2c8	; white background
+
 	jmp	*
 
 sdev	dta	c'S:',$9b

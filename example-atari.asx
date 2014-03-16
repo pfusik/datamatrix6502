@@ -9,7 +9,9 @@ main
 	jsr	DataMatrix_code
 
 ; print result
-	mva	$2c8	$2c6	; border color -> background color
+	mva	#$c	$2c6	; white background
+	sta	$2c8	; white border
+	mva	#0	$2c5	; black ink
 	mva	#1	$2f0	; hide cursor
 	mwa	#DataMatrix_symbol	symbol_ptr
 	mva	#DataMatrix_SIZE	rows
