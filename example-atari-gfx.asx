@@ -22,9 +22,9 @@ main
 	ldx	#DataMatrix_SIZE
 draw_line
 	ldy	#0
+:[DataMatrix_SIZE&7]!=0	lda	#$100>>[DataMatrix_SIZE&7]
 draw_byte
-	ert	[DataMatrix_SIZE&7]!=0
-	lda	#1
+:[DataMatrix_SIZE&7]==0	lda	#1
 draw_bit
 	lsr	DataMatrix_symbol
 symbol_ptr	equ	*-2
@@ -32,8 +32,9 @@ symbol_ptr	equ	*-2
 	rol	@
 	bcc	draw_bit
 	sta	(scr_ptr),y
+:[DataMatrix_SIZE&7]!=0	lda	#1
 	iny
-	cpy	#DataMatrix_SIZE/8
+	cpy	#[DataMatrix_SIZE+7]>>3
 	bcc	draw_byte
 	lda	#10
 	add:sta	scr_ptr
