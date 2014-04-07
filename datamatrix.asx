@@ -43,13 +43,13 @@ DataMatrix_encodeMessage_1
 	bmi	DataMatrix_padMessage_2
 
 DataMatrix_padMessage_1
-	mva	DataMatrix_padding,x	DataMatrix_message,x
+	sta	DataMatrix_message,x
 DataMatrix_padMessage_2
 	inx
-	cpx	#DataMatrix_DATA_CODEWORDS
-	bcc	DataMatrix_padMessage_1
+	lda	DataMatrix_padding,x
+	bne	DataMatrix_padMessage_1
 
-	ldx	#0
+	tax	; #0
 	lda	#1
 DataMatrix_initExpLog_1
 	sta	DataMatrix_exp,x
@@ -353,6 +353,7 @@ DataMatrix_poly	dta	$21,$4f,$be,$f5,$5b,$dd,$e9,$19,$18,$06,$90,$97,$79,$ba,$8c,
 
 DataMatrix_padding
 :DataMatrix_DATA_CODEWORDS	dta	[129+[1+#]*149%253]%254+1
+	dta	0
 
 DataMatrix_shapeX	dta	0,-1,-2,0,-1,-2,-1,-2
 	ift	DataMatrix_SIZE==14||DataMatrix_SIZE==22||DataMatrix_SIZE==32||DataMatrix_SIZE==40||DataMatrix_SIZE==48 ; corner1
