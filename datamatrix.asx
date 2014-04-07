@@ -13,7 +13,7 @@
 
 ; public interface:
 
-DataMatrix_EOF	equ	128
+DataMatrix_EOF	equ	255
 
 DataMatrix_message	equ	DataMatrix_data ; DataMatrix_DATA_CODEWORDS
 DataMatrix_symbol	equ	DataMatrix_data+$100	; DataMatrix_SIZE*DataMatrix_SIZE
@@ -38,13 +38,10 @@ DataMatrix_log	equ	Datamatrix_data+$200	; $100
 DataMatrix_encodeMessage_1
 	inx
 	inc	DataMatrix_message,x
-; FIXME: support $7F
-	bpl	DataMatrix_encodeMessage_1
-	bmi	DataMatrix_padMessage_2
-
+	bne	DataMatrix_encodeMessage_1
+	lda	#129
 DataMatrix_padMessage_1
 	sta	DataMatrix_message,x
-DataMatrix_padMessage_2
 	inx
 	lda	DataMatrix_padding,x
 	bne	DataMatrix_padMessage_1
@@ -353,19 +350,18 @@ DataMatrix_poly	dta	$21,$4f,$be,$f5,$5b,$dd,$e9,$19,$18,$06,$90,$97,$79,$ba,$8c,
 
 DataMatrix_padding
 :DataMatrix_DATA_CODEWORDS	dta	[129+[1+#]*149%253]%254+1
-	dta	0
-
-DataMatrix_shapeX	dta	0,-1,-2,0,-1,-2,-1,-2
-	ift	DataMatrix_SIZE==14||DataMatrix_SIZE==22||DataMatrix_SIZE==32||DataMatrix_SIZE==40||DataMatrix_SIZE==48 ; corner1
-	dta	DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-2,2,1,0
-	eli	DataMatrix_SIZE==16||DataMatrix_SIZE==24 ; corner2
-	dta	DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-2,DataMatrix_MATRIX_SIZE-3,DataMatrix_MATRIX_SIZE-4,0,0,0
-	eif
+; NOTE: the following two zero bytes terminate DataMatrix_padding:
 DataMatrix_shapeY	dta	0,0,0,-1,-1,-1,-2,-2
 	ift	DataMatrix_SIZE==14||DataMatrix_SIZE==22||DataMatrix_SIZE==32||DataMatrix_SIZE==40||DataMatrix_SIZE==48 ; corner1
 	dta	3-DataMatrix_MATRIX_SIZE,2-DataMatrix_MATRIX_SIZE,1-DataMatrix_MATRIX_SIZE,-DataMatrix_MATRIX_SIZE,-DataMatrix_MATRIX_SIZE,-1,-1,-1
 	eli	DataMatrix_SIZE==16||DataMatrix_SIZE==24 ; corner2
 	dta	3-DataMatrix_MATRIX_SIZE,2-DataMatrix_MATRIX_SIZE,2-DataMatrix_MATRIX_SIZE,2-DataMatrix_MATRIX_SIZE,2-DataMatrix_MATRIX_SIZE,1,0,-1
+	eif
+DataMatrix_shapeX	dta	0,-1,-2,0,-1,-2,-1,-2
+	ift	DataMatrix_SIZE==14||DataMatrix_SIZE==22||DataMatrix_SIZE==32||DataMatrix_SIZE==40||DataMatrix_SIZE==48 ; corner1
+	dta	DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-2,2,1,0
+	eli	DataMatrix_SIZE==16||DataMatrix_SIZE==24 ; corner2
+	dta	DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-1,DataMatrix_MATRIX_SIZE-2,DataMatrix_MATRIX_SIZE-3,DataMatrix_MATRIX_SIZE-4,0,0,0
 	eif
 
 	ift	DataMatrix_SIZE<=26

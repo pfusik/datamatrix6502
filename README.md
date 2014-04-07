@@ -52,9 +52,11 @@ Usage
 -----
 
 1. Store ASCII message at `DataMatrix_data`.
-The message must be terminated with `DataMatrix_EOF` (128)
+The message must be terminated with `DataMatrix_EOF` (255)
 and short enough to fit in the desired symbol size (see above, the terminator doesn't count).
 Please note that the routine will destroy the input message, so you need to recreate it every time.
+It is possible to store two consecutive digits in one byte: `129+first_digit*10+second_digit`,
+e.g. 129+65 carries identical information to '6','5'.
 
 2. Call the routine:
 
