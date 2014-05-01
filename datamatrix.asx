@@ -192,44 +192,6 @@ DataMatrix_fill_left
 
 	rts
 
-DataMatrix_setModuleWrapped
-	php
-	tya
-	bpl	DataMatrix_setModuleWrapped_yOk
-	add	#DataMatrix_MATRIX_SIZE
-	tay
-	ift	[DataMatrix_MATRIX_SIZE&7]!=0
-	txa
-	add	#4-[[DataMatrix_MATRIX_SIZE+4]&7]
-	tax
-	eif
-DataMatrix_setModuleWrapped_yOk
-	txa
-	bpl	DataMatrix_setModuleWrapped_xOk
-	add	#DataMatrix_MATRIX_SIZE
-	tax
-	ift	[DataMatrix_MATRIX_SIZE&7]!=0
-	tya
-	add	#4-[[DataMatrix_MATRIX_SIZE+4]&7]
-	tay
-	eif
-DataMatrix_setModuleWrapped_xOk
-	ift	DataMatrix_SIZE>26
-	cpx	#DataMatrix_MATRIX_SIZE/2
-	bcc	DataMatrix_setModuleWrapped_leftRegion
-	inx:inx
-DataMatrix_setModuleWrapped_leftRegion
-	eif
-	mva	DataMatrix_matrixLo,y	DataMatrix_setModule_store+1
-	mva	DataMatrix_matrixHi,y	DataMatrix_setModule_store+2
-	plp
-	lda	#0
-	rol	@
-DataMatrix_setModule_store
-	sta	$ffff,x
-DataMatrix_setUtah_no
-	rts
-
 DataMatrix_setUtah
 	bcs	DataMatrix_setUtah_no
 	lda	DataMatrix_matrixLo,y
@@ -262,9 +224,39 @@ DataMatrix_column	equ	*-1
 DataMatrix_row	equ	*-1
 	add	DataMatrix_shapeY,y
 	tay
+	bpl	DataMatrix_setModuleWrapped_yOk
+	add	#DataMatrix_MATRIX_SIZE
+	tay
+	ift	[DataMatrix_MATRIX_SIZE&7]!=0
+	txa
+	add	#4-[[DataMatrix_MATRIX_SIZE+4]&7]
+	tax
+	eif
+DataMatrix_setModuleWrapped_yOk
+	txa
+	bpl	DataMatrix_setModuleWrapped_xOk
+	add	#DataMatrix_MATRIX_SIZE
+	tax
+	ift	[DataMatrix_MATRIX_SIZE&7]!=0
+	tya
+	add	#4-[[DataMatrix_MATRIX_SIZE+4]&7]
+	tay
+	eif
+DataMatrix_setModuleWrapped_xOk
+	ift	DataMatrix_SIZE>26
+	cpx	#DataMatrix_MATRIX_SIZE/2
+	bcc	DataMatrix_setModuleWrapped_leftRegion
+	inx:inx
+DataMatrix_setModuleWrapped_leftRegion
+	eif
+	mva	DataMatrix_matrixLo,y	DataMatrix_setModule_store+1
+	mva	DataMatrix_matrixHi,y	DataMatrix_setModule_store+2
 	asl	DataMatrix_dataCodewords
 DataMatrix_fillSource	equ	*-2
-	jsr	DataMatrix_setModuleWrapped
+	lda	#0
+	rol	@
+DataMatrix_setModule_store
+	sta	$ffff,x
 	pla:tay
 	dey
 	and	#7
@@ -272,6 +264,7 @@ DataMatrix_fillSource	equ	*-2
 	inw	DataMatrix_fillSource
 	ldx	DataMatrix_column
 	ldy	DataMatrix_row
+DataMatrix_setUtah_no
 	rts
 
 	ift	DataMatrix_SIZE==10
