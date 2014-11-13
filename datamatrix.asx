@@ -80,9 +80,7 @@ DataMatrix_reedSolomon_2
 DataMatrix_reedSolomon_3
 	cpy	#DataMatrix_ERROR_CODEWORDS-1
 	scs:eor	DataMatrix_errorCodewords+1,y
-	sta	DataMatrix_errorCodewords,y
-	iny
-	cpy	#DataMatrix_ERROR_CODEWORDS
+	sta	DataMatrix_errorCodewords,y+
 	pla
 	bcc	DataMatrix_reedSolomon_2
 	pla:tax
