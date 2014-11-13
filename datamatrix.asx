@@ -41,8 +41,7 @@ DataMatrix_encodeMessage_1
 	bne	DataMatrix_encodeMessage_1
 	lda	#129
 DataMatrix_padMessage_1
-	sta	DataMatrix_message,x
-	inx
+	sta	DataMatrix_message,x+
 	lda	DataMatrix_padding,x
 	bne	DataMatrix_padMessage_1
 
