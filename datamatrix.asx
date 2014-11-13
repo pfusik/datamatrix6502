@@ -112,7 +112,7 @@ DataMatrix_clear_store
 	bne	DataMatrix_clear_store
 DataMatrix_clear_solid
 	lsr	@
-	bpl	DataMatrix_clear_store
+	bpl	DataMatrix_clear_store	; jmp
 DataMatrix_clear_next
 	dey
 	bpl	DataMatrix_clear_line
