@@ -10,6 +10,7 @@ scr_ptr	equ	$80
 main
 	jsr	DataMatrix_code
 
+; enable 80x48x1bpp graphics mode
 	ldx	#$60
 	mva	#3	$342,x
 	mwa	#sdev	$344,x
