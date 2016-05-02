@@ -48,9 +48,6 @@ symbol_ptr	equ	*-2
 
 sdev	dta	c'S:',$9b
 
-columns	org	*+1
-rows	org	*+1
-
 	org	DataMatrix_data
 	dta	c'This projects implements Data Matrix barcode in the 6502 assembly language.',10
 	dta	c'Supported are square ECC 200 symbol sizes up to 48x48.',DataMatrix_EOF
