@@ -7,22 +7,22 @@ This projects implements [Data Matrix barcode](http://en.wikipedia.org/wiki/Data
 in the [6502](http://en.wikipedia.org/wiki/6502) assembly language.
 
 Supported are square ECC 200 symbol sizes up to 48x48.
-Symbol size limits the length of the encoded message and must be selected at compile time:
+The length of the encoded message is limited by the symbol size selected at compile time:
 
-* 10x10 (max 3 characters)
-* 12x12 (max 5 characters)
-* 14x14 (max 8 characters)
-* 16x16 (max 12 characters)
-* 18x18 (max 18 characters)
-* 20x20 (max 22 characters)
-* 22x22 (max 30 characters)
-* 24x24 (max 36 characters)
-* 26x26 (max 44 characters)
-* 32x32 (max 62 characters)
-* 36x36 (max 86 characters)
-* 40x40 (max 114 characters)
-* 44x44 (max 144 characters)
-* 48x48 (max 174 characters)
+* 10x10: max 3 characters
+* 12x12: max 5 characters
+* 14x14: max 8 characters
+* 16x16: max 12 characters
+* 18x18: max 18 characters
+* 20x20: max 22 characters
+* 22x22: max 30 characters
+* 24x24: max 36 characters
+* 26x26: max 44 characters
+* 32x32: max 62 characters
+* 36x36: max 86 characters
+* 40x40: max 114 characters
+* 44x44: max 144 characters
+* 48x48: max 174 characters
 
 Compilation
 -----------
