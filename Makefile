@@ -1,5 +1,5 @@
 run: datamatrix.xex
-	cygstart $<
+	start $<
 
 datamatrix.xex: example-atari.asx datamatrix.asx
 	xasm -q -o $@ $<
