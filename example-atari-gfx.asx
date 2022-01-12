@@ -19,6 +19,7 @@ main
 	jsr	$e456
 	mva	#0	$2c4	; black ink
 
+	mwa	#DataMatrix_symbol	symbol_ptr
 	mwa	$58	scr_ptr
 	ldx	#DataMatrix_SIZE
 draw_line
