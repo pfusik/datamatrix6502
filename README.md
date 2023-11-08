@@ -77,5 +77,5 @@ and [example-atari-gfx.asx](https://github.com/pfusik/datamatrix6502/blob/master
 WTF is 6502?
 ------------
 
-If you prefer a Data Matrix encoder in C, C++, C#, Java, JavaScript, Python,
-Swift or OpenCL, see [DataMatrix.ci](https://github.com/pfusik/datamatrix-ci).
+If you prefer a Data Matrix encoder in C, C++, C#, D, Java, JavaScript, Python,
+Swift, TypeScript or OpenCL, see [DataMatrix.fu](https://github.com/pfusik/datamatrix-fu).
